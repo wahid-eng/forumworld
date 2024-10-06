@@ -18,11 +18,15 @@
 		"express": "^4.21.0",
 		"graphql": "^16.9.0",
 		"helmet": "^8.0.0",
+		"joi": "^17.13.3",
 		"jsonwebtoken": "^9.0.2",
 		"mongoose": "^8.7.0"
 	},
 	"type": "module",
 	"devDependencies": {
+		"@types/bcryptjs": "^2.4.6",
+		"@types/joi": "^17.2.2",
+		"@types/jsonwebtoken": "^9.0.7",
 		"nodemon": "^3.1.7"
 	}
 }
