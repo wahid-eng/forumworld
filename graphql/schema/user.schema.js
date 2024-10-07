@@ -28,6 +28,12 @@ export const userTypeDefs = gql`
 		password: String!
 	}
 
+	input UpdateUserPayload {
+		name: String
+		email: String
+		password: String
+	}
+
 	type Query {
 		user(id: ID!): User!
 	}
@@ -35,6 +41,7 @@ export const userTypeDefs = gql`
 	type Mutation {
 		register(payload: RegisterPayload!): AuthResponse
 		login(payload: LoginPayload!): AuthResponse!
+		updateProfile(id: ID!, payload: UpdateUserPayload!): User!
 	}
 `;
 
@@ -48,7 +55,7 @@ export const userResolvers = {
 			if (error) throw new UserInputError(error.details[0].message);
 
 			try {
-				const user = await User.findById(payload.id);
+				const user = await User.findById(payload.id).select('-password');
 				if (!user) {
 					throw new Error('User not found');
 				}
@@ -70,7 +77,9 @@ export const userResolvers = {
 
 			try {
 				const { name, email, password } = payload;
-				const existingUser = await User.findOne({ email });
+				const existingUser = await User.findOne({ email })
+					.select('-password')
+					.exec();
 				if (existingUser) throw new UserInputError('User already exists');
 				// Create and save new user
 				const user = new User({ name, email, password });
@@ -101,6 +110,35 @@ export const userResolvers = {
 				// Generate JWT token
 				const token = user.generateAuthToken();
 				return { user, token };
+			} catch (error) {
+				throw new Error(error.message);
+			}
+		},
+
+		updateProfile: async (_, args) => {
+			const { error } = Joi.object({
+				id: Joi.string().hex().length(24).required(),
+				payload: Joi.object({
+					name: Joi.string().optional(),
+					email: Joi.string().email().optional(),
+					password: Joi.string().min(6).optional(),
+				}),
+			}).validate(args);
+
+			if (error) throw new UserInputError(error.details[0].message);
+
+			const { name, email, password } = args.payload;
+
+			try {
+				const user = await User.findByIdAndUpdate(
+					args.id,
+					{ name, email, password },
+					{ new: true, runValidators: true }
+				)
+					.select('-password')
+					.exec();
+				if (!user) throw new Error('User not found');
+				return user;
 			} catch (error) {
 				throw new Error(error.message);
 			}
