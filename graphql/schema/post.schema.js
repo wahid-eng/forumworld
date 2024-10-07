@@ -11,6 +11,21 @@ export const postTypeDefs = gql`
 		author: User!
 	}
 
+	type PostConnection {
+		edges: [PostEdge]
+		pageInfo: PageInfo
+	}
+
+	type PostEdge {
+		node: Post
+		cursor: String
+	}
+
+	type PageInfo {
+		endCursor: String
+		hasNextPage: Boolean
+	}
+
 	type DeleteResponse {
 		success: Boolean!
 		message: String!
@@ -29,7 +44,7 @@ export const postTypeDefs = gql`
 	}
 
 	type Query {
-		posts: [Post!]!
+		posts(first: Int, after: String): PostConnection
 		post(id: ID!): Post!
 	}
 
@@ -42,7 +57,26 @@ export const postTypeDefs = gql`
 
 export const postResolvers = {
 	Query: {
-		posts: async () => await Post.find(),
+		posts: async (_, args) => {
+			const { first, after } = args;
+			const query = {};
+
+			// If "after" is provided, use it as a cursor to start fetching after a specific id
+			if (after) {
+				query._id = { $gt: after };
+			}
+
+			const posts = await Post.find(query).limit(first).sort({ _id: 1 }); // Sort by _id to maintain consistent order
+			const edges = posts.map((post) => ({
+				node: post,
+				cursor: post._id, // Use the post's _id as the cursor
+			}));
+
+			const hasNextPage = posts.length === first; // Check if there's more data
+			const endCursor = posts.length > 0 ? posts[posts.length - 1]._id : null;
+
+			return { edges, pageInfo: { hasNextPage, endCursor } };
+		},
 		post: async (_, payload) => {
 			const { error } = Joi.object({
 				id: Joi.string().hex().length(24).required(),
