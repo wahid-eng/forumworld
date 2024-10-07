@@ -3,12 +3,23 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import helmet from 'helmet';
 import 'dotenv/config';
+import winston from 'winston';
 import { ApolloServer, gql } from 'apollo-server-express';
 import { schema } from './graphql/schema/index.js';
 import depthLimit from 'graphql-depth-limit';
 
 const app = express();
 const port = process.env.PORT || 8000;
+
+// logger
+const logger = winston.createLogger({
+	level: 'error',
+	format: winston.format.combine(
+		winston.format.timestamp(), // Add timestamp
+		winston.format.json() // Log in JSON format
+	),
+	transports: [new winston.transports.File({ filename: 'error.log' })],
+});
 
 // Middleware
 app.use(express.json());
@@ -17,7 +28,17 @@ app.use(cors());
 app.use(helmet({ contentSecurityPolicy: false }));
 
 // GraphQL
-const server = new ApolloServer({ schema, validationRules: [depthLimit(3)] });
+const server = new ApolloServer({
+	schema,
+	validationRules: [depthLimit(3)],
+	formatError: (error) => {
+		logger.error(error.message, { stack: error.stack });
+		return {
+			message: error.message,
+			code: error.extensions.code || 'INTERNAL_SERVER_ERROR',
+		};
+	},
+});
 await server.start();
 server.applyMiddleware({ app });
 
