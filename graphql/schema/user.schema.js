@@ -1,14 +1,15 @@
 import { AuthenticationError, gql, UserInputError } from 'apollo-server-core';
-import { makeExecutableSchema } from '@graphql-tools/schema';
 import Joi from 'joi';
 import User from '../../models/user.model.js';
+import Post from '../../models/post.model.js';
 
-const typeDefs = gql`
+export const userTypeDefs = gql`
 	type User {
 		id: ID!
 		name: String!
 		email: String!
 		password: String!
+		posts: [Post!]!
 	}
 
 	type AuthResponse {
@@ -32,19 +33,30 @@ const typeDefs = gql`
 	}
 
 	type Mutation {
-		register(payload: RegisterPayload!): AuthResponse!
+		register(payload: RegisterPayload!): AuthResponse
 		login(payload: LoginPayload!): AuthResponse!
 	}
 `;
 
-const resolvers = {
+export const userResolvers = {
 	Query: {
-		user: (_, { id }) => ({
-			id: '1',
-			name: 'Mohammad Wahid',
-			email: 'wahid@gmail.com',
-			password: '123456',
-		}),
+		user: async (_, payload) => {
+			const { error } = Joi.object({
+				id: Joi.string().hex().length(24).required(),
+			}).validate(payload);
+
+			if (error) throw new UserInputError(error.details[0].message);
+
+			try {
+				const user = await User.findById(payload.id);
+				if (!user) {
+					throw new Error('User not found');
+				}
+				return user;
+			} catch (error) {
+				throw new Error(error.message);
+			}
+		},
 	},
 	Mutation: {
 		register: async (_, { payload }) => {
@@ -68,8 +80,7 @@ const resolvers = {
 				const token = user.generateAuthToken();
 				return { user, token };
 			} catch (error) {
-				// Handle Mongoose validation errors
-				throw new UserInputError(error.message);
+				throw new Error(error.message);
 			}
 		},
 
@@ -91,12 +102,19 @@ const resolvers = {
 				const token = user.generateAuthToken();
 				return { user, token };
 			} catch (error) {
-				throw new AuthenticationError(error.message);
+				throw new Error(error.message);
+			}
+		},
+	},
+
+	User: {
+		posts: async (parent, args) => {
+			try {
+				const posts = await Post.find({ author: parent.id });
+				return posts;
+			} catch (error) {
+				throw new Error(error.message);
 			}
 		},
 	},
 };
-
-const userSchema = makeExecutableSchema({ typeDefs, resolvers });
-
-export default userSchema;

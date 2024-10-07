@@ -1,6 +1,9 @@
-import { mergeSchemas } from '@graphql-tools/schema';
-import userSchema from './user.schema.js';
+import { mergeResolvers, mergeTypeDefs } from '@graphql-tools/merge';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { userResolvers, userTypeDefs } from './user.schema.js';
+import { postResolvers, postTypeDefs } from './post.schema.js';
 
-export const schema = mergeSchemas({
-	schemas: [userSchema],
-});
+const typeDefs = mergeTypeDefs([userTypeDefs, postTypeDefs]);
+const resolvers = mergeResolvers([userResolvers, postResolvers]);
+
+export const schema = makeExecutableSchema({ typeDefs, resolvers });

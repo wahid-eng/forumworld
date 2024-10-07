@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import 'dotenv/config';
 import { ApolloServer, gql } from 'apollo-server-express';
 import { schema } from './graphql/schema/index.js';
+import depthLimit from 'graphql-depth-limit';
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -16,7 +17,7 @@ app.use(cors());
 app.use(helmet({ contentSecurityPolicy: false }));
 
 // GraphQL
-const server = new ApolloServer({ schema });
+const server = new ApolloServer({ schema, validationRules: [depthLimit(3)] });
 await server.start();
 server.applyMiddleware({ app });
 
