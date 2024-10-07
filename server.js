@@ -7,6 +7,7 @@ import winston from 'winston';
 import { ApolloServer, gql } from 'apollo-server-express';
 import { schema } from './graphql/schema/index.js';
 import depthLimit from 'graphql-depth-limit';
+import { getUserFromToken } from './graphql/auth.js';
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -31,6 +32,11 @@ app.use(helmet({ contentSecurityPolicy: false }));
 const server = new ApolloServer({
 	schema,
 	validationRules: [depthLimit(3)],
+	context: ({ req }) => {
+		const token = req.headers.authorization || '';
+		const user = getUserFromToken(token.replace('Bearer ', ''));
+		return { user };
+	},
 	formatError: (error) => {
 		logger.error(error.message, { stack: error.stack });
 		return {

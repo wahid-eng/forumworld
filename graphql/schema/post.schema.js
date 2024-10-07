@@ -2,6 +2,7 @@ import { gql, UserInputError } from 'apollo-server-core';
 import Joi from 'joi';
 import Post from '../../models/post.model.js';
 import User from '../../models/user.model.js';
+import { isAuthenticated } from '../auth.js';
 
 export const postTypeDefs = gql`
 	type Post {
@@ -57,7 +58,8 @@ export const postTypeDefs = gql`
 
 export const postResolvers = {
 	Query: {
-		posts: async (_, args) => {
+		posts: async (_, args, context) => {
+			isAuthenticated(context);
 			const { first, after } = args;
 			const query = {};
 
@@ -77,7 +79,8 @@ export const postResolvers = {
 
 			return { edges, pageInfo: { hasNextPage, endCursor } };
 		},
-		post: async (_, payload) => {
+		post: async (_, payload, context) => {
+			isAuthenticated(context);
 			const { error } = Joi.object({
 				id: Joi.string().hex().length(24).required(),
 			}).validate(payload);
@@ -95,7 +98,8 @@ export const postResolvers = {
 		},
 	},
 	Mutation: {
-		createPost: async (_, { payload }) => {
+		createPost: async (_, { payload }, context) => {
+			isAuthenticated(context);
 			const { error } = Joi.object({
 				title: Joi.string().required(),
 				content: Joi.string().required(),
@@ -116,7 +120,8 @@ export const postResolvers = {
 				throw new Error(error.message);
 			}
 		},
-		updatePost: async (_, args) => {
+		updatePost: async (_, args, context) => {
+			isAuthenticated(context);
 			const { error } = Joi.object({
 				id: Joi.string().hex().length(24).required(),
 				payload: Joi.object({
@@ -148,7 +153,8 @@ export const postResolvers = {
 				throw new Error(error.message);
 			}
 		},
-		deletePost: async (_, args) => {
+		deletePost: async (_, args, context) => {
+			isAuthenticated(context);
 			const { error } = Joi.object({
 				id: Joi.string().hex().length(24).required(),
 			}).validate(args);

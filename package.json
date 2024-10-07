@@ -28,6 +28,7 @@
 	"type": "module",
 	"devDependencies": {
 		"@types/bcryptjs": "^2.4.6",
+		"@types/graphql-depth-limit": "^1.1.6",
 		"@types/joi": "^17.2.2",
 		"@types/jsonwebtoken": "^9.0.7",
 		"nodemon": "^3.1.7"

@@ -2,6 +2,7 @@ import { AuthenticationError, gql, UserInputError } from 'apollo-server-core';
 import Joi from 'joi';
 import User from '../../models/user.model.js';
 import Post from '../../models/post.model.js';
+import { isAuthenticated } from '../auth.js';
 
 export const userTypeDefs = gql`
 	type User {
@@ -47,7 +48,8 @@ export const userTypeDefs = gql`
 
 export const userResolvers = {
 	Query: {
-		user: async (_, payload) => {
+		user: async (_, payload, context) => {
+			isAuthenticated(context);
 			const { error } = Joi.object({
 				id: Joi.string().hex().length(24).required(),
 			}).validate(payload);
@@ -115,7 +117,8 @@ export const userResolvers = {
 			}
 		},
 
-		updateProfile: async (_, args) => {
+		updateProfile: async (_, args, context) => {
+			isAuthenticated(context);
 			const { error } = Joi.object({
 				id: Joi.string().hex().length(24).required(),
 				payload: Joi.object({
