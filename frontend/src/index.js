@@ -5,11 +5,14 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ApolloProvider } from '@apollo/client';
 import { apolloClient } from './utils/graphql/client';
+import { AuthProvider } from './context/AuthContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
 	<ApolloProvider client={apolloClient}>
-		<App />
+		<AuthProvider>
+			<App />
+		</AuthProvider>
 	</ApolloProvider>
 );
 

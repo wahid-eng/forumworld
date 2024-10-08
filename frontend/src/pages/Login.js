@@ -1,13 +1,14 @@
 import React from 'react';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import { LOGIN_MUTATION } from '../utils/graphql/mutations';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
 	const [userLogin, { loading }] = useMutation(LOGIN_MUTATION);
-	const navigate = useNavigate();
+	const { login } = useAuth();
 
 	const {
 		register,
@@ -26,10 +27,8 @@ export default function Login() {
 			{
 				loading: 'Processig...',
 				success: (response) => {
-					const { token } = response?.data?.login;
-					localStorage.setItem('_token', token);
 					reset();
-					navigate('/dashboard');
+					login(response);
 					return 'Login success';
 				},
 				error: (err) => err.toString(),

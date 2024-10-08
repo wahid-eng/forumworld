@@ -8,6 +8,8 @@ import Blog from './pages/Blog';
 import NoPage from './pages/NoPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import GuestRoutes from './utils/routes/GuestRoutes';
+import PrivateRoute from './utils/routes/PrivateRoutes';
 
 function App() {
 	return (
@@ -16,10 +18,17 @@ function App() {
 			<Routes>
 				<Route path="/" element={<Layout />}>
 					<Route index element={<Home />} />
-					<Route path="login" element={<Login />} />
-					<Route path="register" element={<Register />} />
-					<Route path="dashboard" element={<Dashboard />} />
-					<Route path="blog" element={<Blog />} />
+
+					<Route path="" element={<GuestRoutes />}>
+						<Route path="login" element={<Login />} />
+						<Route path="register" element={<Register />} />
+					</Route>
+
+					<Route path="/" element={<PrivateRoute />}>
+						<Route path="dashboard" element={<Dashboard />} />
+						<Route path="blog" element={<Blog />} />
+					</Route>
+
 					<Route path="*" element={<NoPage />} />
 				</Route>
 			</Routes>

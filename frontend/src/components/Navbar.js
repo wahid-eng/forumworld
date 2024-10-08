@@ -1,55 +1,79 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 export default function Navbar() {
+	const { isAuthenticated, logout } = useAuth();
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const handleLogout = (e) => {
+		e.preventDefault();
+		logout().then(() => {
+			toast.success('Logout successfully!');
+		});
+	};
 	return (
 		<>
 			<nav className="bg-white shadow-md">
 				<div className="container mx-auto px-4 py-4 flex justify-between items-center">
-					<div className="text-2xl font-bold text-blue-500">Brand</div>
+					<div className="text-2xl font-bold text-blue-500">
+						<Link to={'/'}>Brand</Link>
+					</div>
 					<div className="hidden md:flex space-x-6">
-						{/* <!-- Use text-blue-500 for active nav items --> */}
-						<NavLink
-							to={'/dashboard'}
-							className={({ isActive }) =>
-								isActive
-									? 'text-blue-500 hover:text-blue-500'
-									: 'text-gray-700 hover:text-blue-500'
-							}
-						>
-							Dashboard
-						</NavLink>
-						<NavLink
-							to={'/blog'}
-							className={({ isActive }) =>
-								isActive
-									? 'text-blue-500 hover:text-blue-500'
-									: 'text-gray-700 hover:text-blue-500'
-							}
-						>
-							Blog
-						</NavLink>
-						<NavLink
-							to={'/login'}
-							className={({ isActive }) =>
-								isActive
-									? 'text-blue-500 hover:text-blue-500'
-									: 'text-gray-700 hover:text-blue-500'
-							}
-						>
-							Login
-						</NavLink>
-						<NavLink
-							to={'/register'}
-							className={({ isActive }) =>
-								isActive
-									? 'text-blue-500 hover:text-blue-500'
-									: 'text-gray-700 hover:text-blue-500'
-							}
-						>
-							Register
-						</NavLink>
+						{isAuthenticated ? (
+							<>
+								<NavLink
+									to={'/dashboard'}
+									className={({ isActive }) =>
+										isActive
+											? 'text-blue-500 hover:text-blue-500'
+											: 'text-gray-700 hover:text-blue-500'
+									}
+								>
+									Dashboard
+								</NavLink>
+								<NavLink
+									to={'/blog'}
+									className={({ isActive }) =>
+										isActive
+											? 'text-blue-500 hover:text-blue-500'
+											: 'text-gray-700 hover:text-blue-500'
+									}
+								>
+									Blog
+								</NavLink>
+								<NavLink
+									to={'/logout'}
+									className="text-gray-700 hover:text-blue-500"
+									onClick={handleLogout}
+								>
+									Logout
+								</NavLink>
+							</>
+						) : (
+							<>
+								<NavLink
+									to={'/login'}
+									className={({ isActive }) =>
+										isActive
+											? 'text-blue-500 hover:text-blue-500'
+											: 'text-gray-700 hover:text-blue-500'
+									}
+								>
+									Login
+								</NavLink>
+								<NavLink
+									to={'/register'}
+									className={({ isActive }) =>
+										isActive
+											? 'text-blue-500 hover:text-blue-500'
+											: 'text-gray-700 hover:text-blue-500'
+									}
+								>
+									Register
+								</NavLink>
+							</>
+						)}
 					</div>
 
 					{/* <!-- Mobile Menu Toggle --> */}
