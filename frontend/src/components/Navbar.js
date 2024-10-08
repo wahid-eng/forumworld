@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -12,6 +12,23 @@ export default function Navbar() {
 			toast.success('Logout successfully!');
 		});
 	};
+
+	const handleMouseClick = (e) => {
+		e.stopPropagation();
+		if (!e.target.closest('#nav-toggle')) {
+			setTimeout(() => {
+				setIsMenuOpen(false);
+			}, 300);
+		}
+	};
+
+	useEffect(() => {
+		window.addEventListener('mousedown', handleMouseClick);
+		return () => {
+			window.removeEventListener('mousedown', handleMouseClick);
+		};
+	}, []);
+
 	return (
 		<>
 			<nav className="bg-white shadow-md">
@@ -81,7 +98,7 @@ export default function Navbar() {
 						<button
 							id="nav-toggle"
 							className="text-gray-700 hover:text-blue-500 focus:outline-none"
-							onClick={() => setIsMenuOpen(!isMenuOpen)}
+							onClick={() => setIsMenuOpen(true)}
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -102,47 +119,66 @@ export default function Navbar() {
 				</div>
 
 				{/* <!-- Mobile Menu --> */}
-				<div id="mobile-menu" className="hidden md:hidden px-4 py-4 space-y-4">
-					<NavLink
-						to={'/dashboard'}
-						className={({ isActive }) =>
-							isActive
-								? 'text-blue-500 hover:text-blue-500 block'
-								: 'text-gray-700 hover:text-blue-500 block'
-						}
-					>
-						Dashboard
-					</NavLink>
-					<NavLink
-						to={'/blog'}
-						className={({ isActive }) =>
-							isActive
-								? 'text-blue-500 hover:text-blue-500 block'
-								: 'text-gray-700 hover:text-blue-500 block'
-						}
-					>
-						Blog
-					</NavLink>
-					<NavLink
-						to={'/login'}
-						className={({ isActive }) =>
-							isActive
-								? 'text-blue-500 hover:text-blue-500 block'
-								: 'text-gray-700 hover:text-blue-500 block'
-						}
-					>
-						Login
-					</NavLink>
-					<NavLink
-						to={'/register'}
-						className={({ isActive }) =>
-							isActive
-								? 'text-blue-500 hover:text-blue-500 block'
-								: 'text-gray-700 hover:text-blue-500 block'
-						}
-					>
-						Register
-					</NavLink>
+				<div
+					id="mobile-menu"
+					className={`${
+						isMenuOpen ? '' : 'hidden md:hidden'
+					} px-4 py-4 space-y-4`}
+				>
+					{isAuthenticated ? (
+						<>
+							<NavLink
+								to={'/dashboard'}
+								className={({ isActive }) =>
+									isActive
+										? 'text-blue-500 hover:text-blue-500 block'
+										: 'text-gray-700 hover:text-blue-500 block'
+								}
+							>
+								Dashboard
+							</NavLink>
+							<NavLink
+								to={'/blog'}
+								className={({ isActive }) =>
+									isActive
+										? 'text-blue-500 hover:text-blue-500 block'
+										: 'text-gray-700 hover:text-blue-500 block'
+								}
+							>
+								Blog
+							</NavLink>
+							<NavLink
+								to={'/logout'}
+								className="text-gray-700 hover:text-blue-500 block"
+								onClick={handleLogout}
+							>
+								Logout
+							</NavLink>
+						</>
+					) : (
+						<>
+							<NavLink
+								to={'/login'}
+								className={({ isActive }) =>
+									isActive
+										? 'text-blue-500 hover:text-blue-500 block'
+										: 'text-gray-700 hover:text-blue-500 block'
+								}
+							>
+								Login
+							</NavLink>
+							<NavLink
+								to={'/register'}
+								className={({ isActive }) =>
+									isActive
+										? 'text-blue-500 hover:text-blue-500 block'
+										: 'text-gray-700 hover:text-blue-500 block'
+								}
+							>
+								Register
+							</NavLink>
+						</>
+					)}
 				</div>
 			</nav>
 		</>
