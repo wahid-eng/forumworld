@@ -26,8 +26,6 @@ export default function Register() {
 			{
 				loading: 'Processig...',
 				success: (response) => {
-					const { token } = response?.data?.register;
-					sessionStorage.setItem('_token', token);
 					reset();
 					navigate('/login');
 					return 'Registration success';
@@ -107,7 +105,7 @@ export default function Register() {
 								Password
 							</label>
 							<input
-								type="text"
+								type="password"
 								name="password"
 								className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
 								{...register('password', {

@@ -1,17 +1,40 @@
 import React from 'react';
+import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import { LOGIN_MUTATION } from '../utils/graphql/mutations';
 
 export default function Login() {
+	const [userLogin, { loading }] = useMutation(LOGIN_MUTATION);
+	const navigate = useNavigate();
+
 	const {
 		register,
 		handleSubmit,
 		reset,
-		formState: { isLoading, errors },
+		formState: { errors },
 	} = useForm();
 
 	const onSubmit = (data) => {
-		reset();
+		toast.promise(
+			userLogin({
+				variables: {
+					payload: data,
+				},
+			}),
+			{
+				loading: 'Processig...',
+				success: (response) => {
+					const { token } = response?.data?.login;
+					localStorage.setItem('_token', token);
+					reset();
+					navigate('/dashboard');
+					return 'Login success';
+				},
+				error: (err) => err.toString(),
+			}
+		);
 	};
 
 	return (
@@ -19,7 +42,7 @@ export default function Login() {
 			<div className="min-h-screen flex items-center justify-center bg-gray-100">
 				<div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
 					<h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-					<form onSubmit={handleSubmit(onSubmit)}>
+					<form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
 						<div className="mb-4">
 							<label
 								htmlFor="email"
@@ -54,7 +77,7 @@ export default function Login() {
 								Password
 							</label>
 							<input
-								type="text"
+								type="password"
 								name="password"
 								className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
 								{...register('password', {
@@ -73,14 +96,14 @@ export default function Login() {
 						</div>
 						<button
 							type="submit"
-							disabled={isLoading}
+							disabled={loading}
 							className={`w-full text-white py-2 rounded-lg focus:outline-none focus:ring-2 ${
-								isLoading
+								loading
 									? 'focus:ring-blue-400 bg-blue-400 hover:bg-blue-400'
 									: 'focus:ring-blue-500 bg-blue-500 hover:bg-blue-600'
 							}`}
 						>
-							{isLoading ? 'Processing...' : 'Login'}
+							{loading ? 'Processing...' : 'Login'}
 						</button>
 					</form>
 					<p className="text-gray-600 mt-4 text-center">
