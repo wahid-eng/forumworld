@@ -1,17 +1,40 @@
 import React from 'react';
+import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import { REGISTER_MUTATION } from '../utils/graphql/mutations';
 
 export default function Register() {
+	const [userRegister, { loading }] = useMutation(REGISTER_MUTATION);
+	const navigate = useNavigate();
+
 	const {
 		register,
 		handleSubmit,
 		reset,
-		formState: { isLoading, errors },
+		formState: { errors },
 	} = useForm();
 
 	const onSubmit = (data) => {
-		reset();
+		toast.promise(
+			userRegister({
+				variables: {
+					payload: data,
+				},
+			}),
+			{
+				loading: 'Processig...',
+				success: (response) => {
+					const { token } = response?.data?.register;
+					sessionStorage.setItem('_token', token);
+					reset();
+					navigate('/login');
+					return 'Registration success';
+				},
+				error: (err) => err.toString(),
+			}
+		);
 	};
 
 	return (
@@ -103,14 +126,14 @@ export default function Register() {
 						</div>
 						<button
 							type="submit"
-							disabled={isLoading}
+							disabled={loading}
 							className={`w-full text-white py-2 rounded-lg focus:outline-none focus:ring-2 ${
-								isLoading
+								loading
 									? 'focus:ring-blue-400 bg-blue-400 hover:bg-blue-400'
 									: 'focus:ring-blue-500 bg-blue-500 hover:bg-blue-600'
 							}`}
 						>
-							{isLoading ? 'Processing...' : 'Register'}
+							{loading ? 'Processing...' : 'Register'}
 						</button>
 					</form>
 					<p className="text-gray-600 mt-4 text-center">
