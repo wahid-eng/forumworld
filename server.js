@@ -31,7 +31,7 @@ app.use(helmet({ contentSecurityPolicy: false }));
 // GraphQL
 const server = new ApolloServer({
 	schema,
-	validationRules: [depthLimit(3)],
+	validationRules: [depthLimit(5)],
 	context: ({ req }) => {
 		const token = req.headers.authorization || '';
 		const user = getUserFromToken(token.replace('Bearer ', ''));

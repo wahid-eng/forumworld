@@ -12,13 +12,13 @@ export const postTypeDefs = gql`
 		author: User!
 	}
 
-	type PostConnection {
-		edges: [PostEdge]
+	type PostsResponse {
+		posts: [PostEdge]
 		pageInfo: PageInfo
 	}
 
 	type PostEdge {
-		node: Post
+		post: Post
 		cursor: String
 	}
 
@@ -45,8 +45,8 @@ export const postTypeDefs = gql`
 	}
 
 	type Query {
-		posts(first: Int, after: String): PostConnection
-		post(id: ID!): Post!
+		getPosts(limit: Int, cursor: String): PostsResponse
+		getPost(id: ID!): Post!
 	}
 
 	type Mutation {
@@ -58,28 +58,29 @@ export const postTypeDefs = gql`
 
 export const postResolvers = {
 	Query: {
-		posts: async (_, args, context) => {
+		getPosts: async (_, args, context) => {
 			isAuthenticated(context);
-			const { first, after } = args;
+			const { limit, cursor } = args;
 			const query = {};
 
-			// If "after" is provided, use it as a cursor to start fetching after a specific id
-			if (after) {
-				query._id = { $gt: after };
+			// If "cursor" is provided, use it as a cursor to start fetching after a specific id
+			if (cursor) {
+				query._id = { $gt: cursor };
 			}
 
-			const posts = await Post.find(query).limit(first).sort({ _id: 1 }); // Sort by _id to maintain consistent order
-			const edges = posts.map((post) => ({
-				node: post,
+			const postsQuery = await Post.find(query).limit(limit).sort({ _id: 1 }); // Sort by _id to maintain consistent order
+			const posts = postsQuery.map((post) => ({
+				post,
 				cursor: post._id, // Use the post's _id as the cursor
 			}));
 
-			const hasNextPage = posts.length === first; // Check if there's more data
-			const endCursor = posts.length > 0 ? posts[posts.length - 1]._id : null;
+			const hasNextPage = postsQuery.length === limit; // Check if there's more data
+			const endCursor =
+				postsQuery.length > 0 ? postsQuery[postsQuery.length - 1]._id : null;
 
-			return { edges, pageInfo: { hasNextPage, endCursor } };
+			return { posts, pageInfo: { hasNextPage, endCursor } };
 		},
-		post: async (_, payload, context) => {
+		getPost: async (_, payload, context) => {
 			isAuthenticated(context);
 			const { error } = Joi.object({
 				id: Joi.string().hex().length(24).required(),

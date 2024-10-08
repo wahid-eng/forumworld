@@ -5,8 +5,10 @@ import Navbar from '../components/Navbar';
 export default function Layout() {
 	return (
 		<>
-			<Navbar />
-			<Outlet />
+			<div className="min-h-screen bg-gray-100">
+				<Navbar />
+				<Outlet />
+			</div>
 		</>
 	);
 }
