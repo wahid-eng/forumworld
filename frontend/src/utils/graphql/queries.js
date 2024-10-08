@@ -21,3 +21,16 @@ export const POSTS_QUERY = gql`
 		}
 	}
 `;
+
+export const SINGLE_POST_QUERY = gql`
+	query GetPost($getPostId: ID!) {
+		getPost(id: $getPostId) {
+			title
+			content
+			author {
+				id
+				name
+			}
+		}
+	}
+`;

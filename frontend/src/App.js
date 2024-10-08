@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import GuestRoutes from './utils/routes/GuestRoutes';
 import PrivateRoute from './utils/routes/PrivateRoutes';
+import SinglePost from './components/SinglePost';
 
 function App() {
 	return (
@@ -27,6 +28,7 @@ function App() {
 					<Route path="/" element={<PrivateRoute />}>
 						<Route path="dashboard" element={<Dashboard />} />
 						<Route path="blog" element={<Blog />} />
+						<Route path="blog/:id" element={<SinglePost />} />
 					</Route>
 
 					<Route path="*" element={<NoPage />} />
