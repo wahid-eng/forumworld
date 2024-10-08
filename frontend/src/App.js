@@ -3,8 +3,10 @@ import './App.css';
 import Layout from './pages/Layout';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
-import Blogs from './pages/Blogs';
+import Blog from './pages/Blog';
 import NoPage from './pages/NoPage';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 function App() {
 	return (
@@ -12,8 +14,10 @@ function App() {
 			<Routes>
 				<Route path="/" element={<Layout />}>
 					<Route index element={<Home />} />
+					<Route path="login" element={<Login />} />
+					<Route path="register" element={<Register />} />
 					<Route path="dashboard" element={<Dashboard />} />
-					<Route path="blogs" element={<Blogs />} />
+					<Route path="blog" element={<Blog />} />
 					<Route path="*" element={<NoPage />} />
 				</Route>
 			</Routes>
